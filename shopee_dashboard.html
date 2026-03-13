@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shopee Analytics Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Roboto+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #EE4D2D;
+    --orange-light: #FF7337;
+    --orange-pale: #fff3ef;
+    --orange-soft: #fde8e2;
+    --bg: #f5f6fa;
+    --card: #ffffff;
+    --text-main: #1a1a2e;
+    --text-sub: #6b7280;
+    --text-light: #9ca3af;
+    --border: #f0ece8;
+    --green: #16a34a;
+    --red: #dc2626;
+    --blue: #2563eb;
+    --purple: #7c3aed;
+    --yellow: #d97706;
+    --shadow: 0 2px 16px rgba(238,77,45,0.07);
+    --shadow-hover: 0 8px 32px rgba(238,77,45,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text-main);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #EE4D2D 0%, #FF7337 60%, #ffb347 100%);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 20px rgba(238,77,45,0.3);
+  }
+
+  .logo-area {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .shopee-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+
+  .logo-text {
+    font-size: 26px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.85);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: -2px;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .period-badge {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.35);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(4px);
+  }
+
+  .live-dot {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+    box-shadow: 0 0 6px #4ade80;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.3); }
+  }
+
+  /* LAYOUT */
+  .main {
+    padding: 28px 32px;
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+
+  /* FILTER BAR */
+  .filter-bar {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+
+  .filter-label {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--text-sub);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .filter-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .filter-btn {
+    padding: 7px 16px;
+    border-radius: 20px;
+    border: 2px solid var(--border);
+    background: white;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    cursor: pointer;
+    color: var(--text-sub);
+    transition: all 0.2s;
+  }
+
+  .filter-btn:hover { border-color: var(--orange); color: var(--orange); }
+  .filter-btn.active { background: var(--orange); color: white; border-color: var(--orange); }
+
+  .filter-select {
+    padding: 7px 12px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: white;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'Nunito', sans-serif;
+    color: var(--text-main);
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .filter-select:focus { border-color: var(--orange); }
+
+  .filter-divider { width: 1px; height: 28px; background: var(--border); }
+
+  /* KPI GRID */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .kpi-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 20px 20px 16px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+    cursor: default;
+  }
+
+  .kpi-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--accent, var(--orange));
+  }
+
+  .kpi-card.green { --accent: #16a34a; }
+  .kpi-card.blue { --accent: #2563eb; }
+  .kpi-card.purple { --accent: #7c3aed; }
+  .kpi-card.yellow { --accent: #d97706; }
+
+  .kpi-icon-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .kpi-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    background: var(--icon-bg, #fff3ef);
+  }
+
+  .kpi-card.green .kpi-icon { background: #f0fdf4; }
+  .kpi-card.blue .kpi-icon { background: #eff6ff; }
+  .kpi-card.purple .kpi-icon { background: #f5f3ff; }
+  .kpi-card.yellow .kpi-icon { background: #fffbeb; }
+
+  .kpi-trend {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    font-weight: 800;
+    padding: 3px 8px;
+    border-radius: 20px;
+  }
+
+  .kpi-trend.up { color: #16a34a; background: #f0fdf4; }
+  .kpi-trend.down { color: #dc2626; background: #fef2f2; }
+
+  .kpi-value {
+    font-size: 26px;
+    font-weight: 900;
+    color: var(--text-main);
+    line-height: 1;
+    margin-bottom: 4px;
+    font-family: 'Roboto Mono', monospace;
+  }
+
+  .kpi-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-sub);
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    margin-bottom: 2px;
+  }
+
+  .kpi-sub {
+    font-size: 11px;
+    color: var(--text-light);
+    font-weight: 600;
+  }
+
+  /* CHART GRID */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .chart-grid-3 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .chart-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 22px 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    transition: all 0.3s;
+  }
+
+  .chart-card:hover { box-shadow: var(--shadow-hover); }
+
+  .chart-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+
+  .chart-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 2px;
+  }
+
+  .chart-subtitle {
+    font-size: 11px;
+    color: var(--text-sub);
+    font-weight: 600;
+  }
+
+  .chart-badge {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .badge-orange { background: var(--orange-soft); color: var(--orange); }
+  .badge-green { background: #f0fdf4; color: #16a34a; }
+  .badge-blue { background: #eff6ff; color: #2563eb; }
+  .badge-purple { background: #f5f3ff; color: #7c3aed; }
+
+  .chart-wrap {
+    position: relative;
+    height: 220px;
+  }
+
+  .chart-wrap-sm {
+    position: relative;
+    height: 180px;
+  }
+
+  .chart-wrap-lg {
+    position: relative;
+    height: 260px;
+  }
+
+  /* TABLE */
+  .table-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 22px 24px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+
+  thead th {
+    text-align: left;
+    padding: 10px 12px;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--text-sub);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 2px solid var(--border);
+    background: var(--orange-pale);
+  }
+
+  thead th:first-child { border-radius: 8px 0 0 0; }
+  thead th:last-child { border-radius: 0 8px 0 0; }
+
+  tbody tr {
+    border-bottom: 1px solid #f9f9f9;
+    transition: background 0.15s;
+  }
+
+  tbody tr:hover { background: var(--orange-pale); }
+
+  tbody td {
+    padding: 11px 12px;
+    font-weight: 600;
+    color: var(--text-main);
+    vertical-align: middle;
+  }
+
+  .rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 800;
+    background: var(--border);
+    color: var(--text-sub);
+  }
+
+  .rank-badge.gold { background: #fef3c7; color: #d97706; }
+  .rank-badge.silver { background: #f1f5f9; color: #64748b; }
+  .rank-badge.bronze { background: #fff7ed; color: #ea580c; }
+
+  .cat-pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 800;
+    background: var(--orange-soft);
+    color: var(--orange);
+  }
+
+  .progress-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .progress-bar {
+    flex: 1;
+    height: 6px;
+    background: #f3f4f6;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--orange), var(--orange-light));
+    transition: width 1s ease;
+  }
+
+  .text-green { color: #16a34a; font-weight: 800; }
+  .text-red { color: #dc2626; font-weight: 800; }
+  .text-orange { color: var(--orange); font-weight: 800; }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    font-size: 11px;
+    color: var(--text-light);
+    font-weight: 600;
+  }
+
+  /* MINI STATS ROW */
+  .mini-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .mini-stat {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .mini-stat-icon {
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .mini-stat-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-sub);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .mini-stat-value {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--text-main);
+    font-family: 'Roboto Mono', monospace;
+  }
+
+  /* Sparkline bars */
+  .spark {
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    height: 30px;
+  }
+
+  .spark-bar {
+    flex: 1;
+    border-radius: 2px;
+    background: linear-gradient(180deg, var(--orange-light), var(--orange));
+    opacity: 0.5;
+    transition: opacity 0.2s;
+    min-height: 4px;
+  }
+
+  .spark-bar.active { opacity: 1; }
+
+  /* Section label */
+  .section-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--text-sub);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--orange); }
+
+  /* Tooltip for charts */
+  .custom-tooltip {
+    background: var(--text-main);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="logo-area">
+    <div class="shopee-logo">
+      <div class="logo-icon">🛍️</div>
+      <div>
+        <div class="logo-text">Shopee</div>
+        <div class="logo-sub">Analytics Dashboard</div>
+      </div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="live-dot"><div class="dot"></div> AO VIVO</div>
+    <div class="period-badge">📅 Jan – Dez 2024</div>
+    <div class="period-badge">🇧🇷 Brasil</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <span class="filter-label">Período</span>
+    <div class="filter-group" id="period-filters">
+      <button class="filter-btn" onclick="setFilter(this, 'period')">7D</button>
+      <button class="filter-btn" onclick="setFilter(this, 'period')">30D</button>
+      <button class="filter-btn active" onclick="setFilter(this, 'period')">12M</button>
+      <button class="filter-btn" onclick="setFilter(this, 'period')">YoY</button>
+    </div>
+    <div class="filter-divider"></div>
+    <span class="filter-label">Região</span>
+    <select class="filter-select" onchange="updateRegion(this.value)">
+      <option value="all">Todas as Regiões</option>
+      <option value="se">Sudeste</option>
+      <option value="ne">Nordeste</option>
+      <option value="s">Sul</option>
+      <option value="co">Centro-Oeste</option>
+      <option value="n">Norte</option>
+    </select>
+    <div class="filter-divider"></div>
+    <span class="filter-label">Categoria</span>
+    <select class="filter-select" onchange="updateCategory(this.value)">
+      <option value="all">Todas as Categorias</option>
+      <option value="eletronicos">Eletrônicos</option>
+      <option value="moda">Moda</option>
+      <option value="beleza">Beleza</option>
+      <option value="casa">Casa & Decoração</option>
+      <option value="esporte">Esporte</option>
+    </select>
+    <div class="filter-divider"></div>
+    <span class="filter-label">Visualizar</span>
+    <div class="filter-group">
+      <button class="filter-btn active" onclick="setFilter(this, 'view')">Receita</button>
+      <button class="filter-btn" onclick="setFilter(this, 'view')">Volume</button>
+      <button class="filter-btn" onclick="setFilter(this, 'view')">Usuários</button>
+    </div>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="section-label">📊 Indicadores Principais</div>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon-row">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-trend up">↑ 23.4%</div>
+      </div>
+      <div class="kpi-value" id="kpi-gmv">R$4.8B</div>
+      <div class="kpi-title">GMV Total</div>
+      <div class="kpi-sub">vs R$3.9B em 2023</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-icon-row">
+        <div class="kpi-icon">📦</div>
+        <div class="kpi-trend up">↑ 18.7%</div>
+      </div>
+      <div class="kpi-value" id="kpi-orders">142M</div>
+      <div class="kpi-title">Pedidos</div>
+      <div class="kpi-sub">11.8M/mês em média</div>
+    </div>
+    <div class="kpi-card blue">
+      <div class="kpi-icon-row">
+        <div class="kpi-icon">👥</div>
+        <div class="kpi-trend up">↑ 31.2%</div>
+      </div>
+      <div class="kpi-value" id="kpi-users">67M</div>
+      <div class="kpi-title">Usuários Ativos</div>
+      <div class="kpi-sub">MAU médio do ano</div>
+    </div>
+    <div class="kpi-card purple">
+      <div class="kpi-icon-row">
+        <div class="kpi-icon">🏪</div>
+        <div class="kpi-trend up">↑ 14.6%</div>
+      </div>
+      <div class="kpi-value" id="kpi-sellers">3.2M</div>
+      <div class="kpi-title">Vendedores Ativos</div>
+      <div class="kpi-sub">+410K novos em 2024</div>
+    </div>
+    <div class="kpi-card yellow">
+      <div class="kpi-icon-row">
+        <div class="kpi-icon">⭐</div>
+        <div class="kpi-trend up">↑ 0.3 pts</div>
+      </div>
+      <div class="kpi-value" id="kpi-nps">4.72</div>
+      <div class="kpi-title">NPS Médio</div>
+      <div class="kpi-sub">Avaliação dos compradores</div>
+    </div>
+  </div>
+
+  <!-- MINI STATS -->
+  <div class="mini-stats">
+    <div class="mini-stat">
+      <div class="mini-stat-icon">🔄</div>
+      <div>
+        <div class="mini-stat-label">Taxa de Conversão</div>
+        <div class="mini-stat-value">3.84%</div>
+      </div>
+    </div>
+    <div class="mini-stat">
+      <div class="mini-stat-icon">🛒</div>
+      <div>
+        <div class="mini-stat-label">Ticket Médio</div>
+        <div class="mini-stat-value">R$ 136</div>
+      </div>
+    </div>
+    <div class="mini-stat">
+      <div class="mini-stat-icon">📱</div>
+      <div>
+        <div class="mini-stat-label">Pedidos via App</div>
+        <div class="mini-stat-value">88.3%</div>
+      </div>
+    </div>
+    <div class="mini-stat">
+      <div class="mini-stat-icon">🔁</div>
+      <div>
+        <div class="mini-stat-label">Retenção 90 dias</div>
+        <div class="mini-stat-value">62.7%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CHARTS ROW 1 -->
+  <div class="section-label">📈 Análise de Receita & Volume</div>
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">GMV Mensal & Pedidos 2024</div>
+          <div class="chart-subtitle">Receita em R$ bilhões · Volume em milhões</div>
+        </div>
+        <div class="chart-badge badge-orange">ANUAL</div>
+      </div>
+      <div class="chart-wrap-lg"><canvas id="revenueChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Vendas por Categoria</div>
+          <div class="chart-subtitle">Participação no GMV total</div>
+        </div>
+        <div class="chart-badge badge-purple">2024</div>
+      </div>
+      <div class="chart-wrap-lg"><canvas id="categoryChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- CHARTS ROW 2 -->
+  <div class="chart-grid-3">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Crescimento de Usuários</div>
+          <div class="chart-subtitle">MAU vs DAU em milhões</div>
+        </div>
+        <div class="chart-badge badge-blue">MENSAL</div>
+      </div>
+      <div class="chart-wrap"><canvas id="usersChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Canais de Aquisição</div>
+          <div class="chart-subtitle">Novos compradores por origem</div>
+        </div>
+        <div class="chart-badge badge-green">2024</div>
+      </div>
+      <div class="chart-wrap"><canvas id="channelChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Taxa de Devolução</div>
+          <div class="chart-subtitle">% pedidos devolvidos por mês</div>
+        </div>
+        <div class="chart-badge badge-orange">META: <2%</div>
+      </div>
+      <div class="chart-wrap"><canvas id="returnChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="section-label">🏆 Top Categorias de Produtos</div>
+  <div class="table-card">
+    <div class="chart-header" style="margin-bottom:16px">
+      <div>
+        <div class="chart-title">Ranking de Categorias · Desempenho 2024</div>
+        <div class="chart-subtitle">GMV, crescimento e participação de mercado</div>
+      </div>
+      <div class="chart-badge badge-orange">TOP 8</div>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Categoria</th>
+          <th>GMV 2024</th>
+          <th>Crescimento YoY</th>
+          <th>Pedidos</th>
+          <th>Ticket Médio</th>
+          <th>Market Share</th>
+          <th>NPS</th>
+        </tr>
+      </thead>
+      <tbody id="ranking-table">
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CHARTS ROW 3 -->
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Distribuição Regional de GMV</div>
+          <div class="chart-subtitle">Participação por região do Brasil</div>
+        </div>
+        <div class="chart-badge badge-blue">REGIÕES</div>
+      </div>
+      <div class="chart-wrap-lg"><canvas id="regionChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-header">
+        <div>
+          <div class="chart-title">Horário de Pico de Vendas</div>
+          <div class="chart-subtitle">Volume relativo de pedidos por hora</div>
+        </div>
+        <div class="chart-badge badge-green">HEATMAP</div>
+      </div>
+      <div class="chart-wrap-lg"><canvas id="heatChart"></canvas></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  🛍️ Shopee Brasil · Analytics Dashboard 2024 · Dados gerados para fins demonstrativos · Atualizado em tempo real
+</div>
+
+<script>
+// ===== CHART DEFAULTS =====
+Chart.defaults.font.family = "'Nunito', sans-serif";
+Chart.defaults.font.weight = '700';
+Chart.defaults.color = '#6b7280';
+
+const orange = '#EE4D2D';
+const orangeLight = '#FF7337';
+const orangePale = 'rgba(238,77,45,0.1)';
+const green = '#16a34a';
+const blue = '#2563eb';
+const purple = '#7c3aed';
+const yellow = '#d97706';
+
+// ===== DATA =====
+const months = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const gmvData = [310,298,342,365,380,420,415,430,460,510,680,590];
+const ordersData = [9.2,8.8,10.1,10.8,11.2,12.4,12.1,12.7,13.6,15.1,20.1,17.4];
+const mauData = [51,52,54,55,57,59,61,63,65,66,70,68];
+const dauData = [18,18.5,19,19.8,20.5,21.3,22,23,24,25,28,26];
+const returnData = [1.8,1.7,1.9,1.6,1.5,1.4,1.4,1.3,1.2,1.3,1.5,1.3];
+
+// ===== REVENUE CHART =====
+new Chart(document.getElementById('revenueChart'), {
+  type: 'bar',
+  data: {
+    labels: months,
+    datasets: [
+      {
+        label: 'GMV (R$ MM)',
+        data: gmvData,
+        backgroundColor: months.map((_, i) => i === 10 ? orange : 'rgba(238,77,45,0.18)'),
+        borderColor: months.map((_, i) => i === 10 ? orange : 'rgba(238,77,45,0.5)'),
+        borderWidth: 2,
+        borderRadius: 8,
+        yAxisID: 'y',
+        order: 2
+      },
+      {
+        label: 'Pedidos (M)',
+        data: ordersData,
+        type: 'line',
+        borderColor: blue,
+        backgroundColor: 'rgba(37,99,235,0.08)',
+        fill: true,
+        tension: 0.4,
+        pointBackgroundColor: blue,
+        pointRadius: 4,
+        pointHoverRadius: 7,
+        borderWidth: 2.5,
+        yAxisID: 'y1',
+        order: 1
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { position: 'top', align: 'end', labels: { boxWidth: 12, padding: 16, font: { size: 11 } } },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => ctx.datasetIndex === 0
+            ? `GMV: R$ ${ctx.parsed.y}MM`
+            : `Pedidos: ${ctx.parsed.y}M`
+        }
+      }
+    },
+    scales: {
+      y: {
+        position: 'left',
+        grid: { color: '#f3f4f6' },
+        ticks: { callback: v => `R$${v}MM`, font: { size: 10 } }
+      },
+      y1: {
+        position: 'right',
+        grid: { display: false },
+        ticks: { callback: v => `${v}M`, font: { size: 10 } }
+      },
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+
+// ===== CATEGORY DONUT =====
+new Chart(document.getElementById('categoryChart'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Eletrônicos', 'Moda & Beleza', 'Casa & Deco', 'Esporte', 'Alimentos', 'Outros'],
+    datasets: [{
+      data: [28, 23, 17, 12, 10, 10],
+      backgroundColor: [orange, blue, purple, green, yellow, '#94a3b8'],
+      borderWidth: 3,
+      borderColor: '#ffffff',
+      hoverOffset: 8
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '62%',
+    plugins: {
+      legend: {
+        position: 'right',
+        labels: { boxWidth: 12, padding: 12, font: { size: 11 } }
+      },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => ` ${ctx.label}: ${ctx.parsed}% do GMV`
+        }
+      }
+    }
+  }
+});
+
+// ===== USERS CHART =====
+new Chart(document.getElementById('usersChart'), {
+  type: 'line',
+  data: {
+    labels: months,
+    datasets: [
+      {
+        label: 'MAU',
+        data: mauData,
+        borderColor: orange,
+        backgroundColor: orangePale,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        borderWidth: 2.5
+      },
+      {
+        label: 'DAU',
+        data: dauData,
+        borderColor: purple,
+        backgroundColor: 'rgba(124,58,237,0.07)',
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointHoverRadius: 6,
+        borderWidth: 2.5
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top', align: 'end', labels: { boxWidth: 10, padding: 12, font: { size: 10 } } }
+    },
+    scales: {
+      y: { grid: { color: '#f3f4f6' }, ticks: { callback: v => `${v}M`, font: { size: 10 } } },
+      x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+
+// ===== CHANNEL BAR =====
+new Chart(document.getElementById('channelChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Orgânico', 'ShopeePay', 'Indicação', 'Shopee Ads', 'Social', 'Outros'],
+    datasets: [{
+      data: [35, 24, 18, 13, 7, 3],
+      backgroundColor: [orange, green, blue, purple, yellow, '#94a3b8'],
+      borderRadius: 8,
+      borderWidth: 0
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: (ctx) => ` ${ctx.parsed.x}% dos novos usuários` } }
+    },
+    scales: {
+      x: { grid: { color: '#f3f4f6' }, ticks: { callback: v => `${v}%`, font: { size: 10 } } },
+      y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+
+// ===== RETURN RATE =====
+new Chart(document.getElementById('returnChart'), {
+  type: 'line',
+  data: {
+    labels: months,
+    datasets: [
+      {
+        label: 'Taxa de Devolução (%)',
+        data: returnData,
+        borderColor: orange,
+        backgroundColor: orangePale,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointHoverRadius: 7,
+        borderWidth: 2.5,
+        pointBackgroundColor: returnData.map(v => v > 1.8 ? '#dc2626' : orange)
+      },
+      {
+        label: 'Meta (2%)',
+        data: Array(12).fill(2),
+        borderColor: '#dc2626',
+        borderDash: [6,4],
+        borderWidth: 1.5,
+        pointRadius: 0,
+        fill: false
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top', align: 'end', labels: { boxWidth: 10, padding: 12, font: { size: 10 } } }
+    },
+    scales: {
+      y: { min: 0.8, max: 2.5, grid: { color: '#f3f4f6' }, ticks: { callback: v => `${v}%`, font: { size: 10 } } },
+      x: { grid: { display: false }, ticks: { font: { size: 10 } } }
+    }
+  }
+});
+
+// ===== REGION BAR =====
+new Chart(document.getElementById('regionChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Sudeste', 'Nordeste', 'Sul', 'Centro-Oeste', 'Norte'],
+    datasets: [
+      {
+        label: 'GMV 2024 (R$ MM)',
+        data: [2120, 1150, 820, 450, 260],
+        backgroundColor: [orange, blue, green, purple, yellow],
+        borderRadius: 10,
+        borderWidth: 0
+      },
+      {
+        label: 'GMV 2023 (R$ MM)',
+        data: [1700, 920, 680, 370, 220],
+        backgroundColor: ['rgba(238,77,45,0.2)', 'rgba(37,99,235,0.2)', 'rgba(22,163,74,0.2)', 'rgba(124,58,237,0.2)', 'rgba(217,119,6,0.2)'],
+        borderRadius: 10,
+        borderWidth: 0
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top', align: 'end', labels: { boxWidth: 10, padding: 12, font: { size: 10 } } },
+      tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label}: R$ ${ctx.parsed.y}MM` } }
+    },
+    scales: {
+      y: { grid: { color: '#f3f4f6' }, ticks: { callback: v => `R$${v}MM`, font: { size: 10 } } },
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+
+// ===== HEATMAP (hora × dia da semana) as grouped bar =====
+const hourLabels = ['06h','08h','10h','12h','14h','16h','18h','20h','22h','00h'];
+const weekdayData = [5,10,18,30,22,20,40,75,55,20];
+const weekendData = [2,5,12,42,38,35,55,90,70,30];
+new Chart(document.getElementById('heatChart'), {
+  type: 'bar',
+  data: {
+    labels: hourLabels,
+    datasets: [
+      {
+        label: 'Dias úteis',
+        data: weekdayData,
+        backgroundColor: 'rgba(37,99,235,0.5)',
+        borderRadius: 6,
+        borderWidth: 0
+      },
+      {
+        label: 'Fins de semana',
+        data: weekendData,
+        backgroundColor: orange,
+        borderRadius: 6,
+        borderWidth: 0
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { position: 'top', align: 'end', labels: { boxWidth: 10, padding: 12, font: { size: 10 } } },
+      tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${ctx.parsed.y} pedidos/min (índice)` } }
+    },
+    scales: {
+      y: { grid: { color: '#f3f4f6' }, ticks: { font: { size: 10 } } },
+      x: { grid: { display: false }, ticks: { font: { size: 11 } } }
+    }
+  }
+});
+
+// ===== RANKING TABLE =====
+const tableData = [
+  { rank: 1, cat: 'Eletrônicos', gmv: 'R$ 1,34B', growth: +32.1, orders: '18.2M', ticket: 'R$ 324', share: 28, nps: 4.6 },
+  { rank: 2, cat: 'Moda & Vestuário', gmv: 'R$ 1,10B', growth: +18.4, orders: '38.7M', ticket: 'R$ 84', share: 23, nps: 4.8 },
+  { rank: 3, cat: 'Casa & Decoração', gmv: 'R$ 0,82B', growth: +27.3, orders: '14.9M', ticket: 'R$ 186', share: 17, nps: 4.7 },
+  { rank: 4, cat: 'Esporte & Lazer', gmv: 'R$ 0,58B', growth: +21.9, orders: '10.3M', ticket: 'R$ 198', share: 12, nps: 4.5 },
+  { rank: 5, cat: 'Beleza & Cuidados', gmv: 'R$ 0,44B', growth: +35.2, orders: '17.6M', ticket: 'R$ 89', share: 9, nps: 4.9 },
+  { rank: 6, cat: 'Alimentos & Bebidas', gmv: 'R$ 0,29B', growth: +44.7, orders: '22.1M', ticket: 'R$ 46', share: 6, nps: 4.4 },
+  { rank: 7, cat: 'Livros & Papelaria', gmv: 'R$ 0,12B', growth: +9.3, orders: '6.8M', ticket: 'R$ 62', share: 3, nps: 4.7 },
+  { rank: 8, cat: 'Brinquedos', gmv: 'R$ 0,11B', growth: -2.4, orders: '5.5M', ticket: 'R$ 74', share: 2, nps: 4.5 },
+];
+
+const rankBadgeClass = [null, 'gold', 'silver', 'bronze'];
+const tbody = document.getElementById('ranking-table');
+tableData.forEach(d => {
+  const cls = d.growth >= 0 ? 'text-green' : 'text-red';
+  const sign = d.growth >= 0 ? '+' : '';
+  const bc = rankBadgeClass[d.rank] || '';
+  tbody.innerHTML += `
+    <tr>
+      <td><span class="rank-badge ${bc}">${d.rank}</span></td>
+      <td><span class="cat-pill">${d.cat}</span></td>
+      <td style="font-family:'Roboto Mono',monospace">${d.gmv}</td>
+      <td class="${cls}">${sign}${d.growth}%</td>
+      <td style="font-family:'Roboto Mono',monospace">${d.orders}</td>
+      <td style="font-family:'Roboto Mono',monospace">${d.ticket}</td>
+      <td>
+        <div class="progress-bar-wrap">
+          <div class="progress-bar"><div class="progress-fill" style="width:${d.share * 3}%"></div></div>
+          <span style="font-size:11px;font-weight:800;color:var(--orange);min-width:28px">${d.share}%</span>
+        </div>
+      </td>
+      <td>⭐ ${d.nps}</td>
+    </tr>
+  `;
+});
+
+// ===== FILTER INTERACTIONS =====
+function setFilter(btn, group) {
+  const parent = btn.closest('.filter-group') || btn.parentElement;
+  parent.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function updateRegion(val) {
+  // Simulated region filter with visual feedback
+  const kpiGmv = document.getElementById('kpi-gmv');
+  const kpiOrders = document.getElementById('kpi-orders');
+  const vals = {
+    all: ['R$4.8B', '142M'],
+    se: ['R$2.1B', '59M'],
+    ne: ['R$1.15B', '36M'],
+    s: ['R$0.82B', '24M'],
+    co: ['R$0.45B', '14M'],
+    n: ['R$0.26B', '9M'],
+  };
+  const [gmv, orders] = vals[val] || vals.all;
+  animateValue(kpiGmv, gmv);
+  animateValue(kpiOrders, orders);
+}
+
+function updateCategory(val) {
+  const kpiGmv = document.getElementById('kpi-gmv');
+  const kpiOrders = document.getElementById('kpi-orders');
+  const vals = {
+    all: ['R$4.8B', '142M'],
+    eletronicos: ['R$1.34B', '18.2M'],
+    moda: ['R$1.10B', '38.7M'],
+    beleza: ['R$0.44B', '17.6M'],
+    casa: ['R$0.82B', '14.9M'],
+    esporte: ['R$0.58B', '10.3M'],
+  };
+  const [gmv, orders] = vals[val] || vals.all;
+  animateValue(kpiGmv, gmv);
+  animateValue(kpiOrders, orders);
+}
+
+function animateValue(el, newVal) {
+  el.style.transform = 'scale(0.9)';
+  el.style.opacity = '0.4';
+  setTimeout(() => {
+    el.textContent = newVal;
+    el.style.transform = 'scale(1)';
+    el.style.opacity = '1';
+    el.style.transition = 'all 0.3s cubic-bezier(0.34,1.56,0.64,1)';
+  }, 180);
+}
+
+// ===== ANIMATED KPI ON LOAD =====
+window.addEventListener('load', () => {
+  document.querySelectorAll('.progress-fill').forEach(el => {
+    const target = el.style.width;
+    el.style.width = '0%';
+    setTimeout(() => { el.style.width = target; el.style.transition = 'width 1s ease'; }, 300);
+  });
+});
+</script>
+</body>
+</html>
